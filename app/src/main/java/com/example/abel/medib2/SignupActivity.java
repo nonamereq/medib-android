@@ -1,8 +1,6 @@
 package com.example.abel.medib2;
 
-import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,24 +11,17 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * A login screen that offers login via email/password.
- */
+import java.util.Observable;
+import java.util.Observer;
+
+import com.example.abel.lib.Authenticator;
+import com.example.abel.lib.Request.SignUpRequest;
+
+
 public class SignupActivity extends AppCompatActivity {
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    //private UserLoginTask mAuthTask = null;
 
     // UI references.
     private EditText mEmailView;
@@ -38,9 +29,50 @@ public class SignupActivity extends AppCompatActivity {
     private View mProgressView;
     private View mLoginFormView;
 
+    //private variables
+    private Authenticator auth;
+    private SignUpRequest request;
+    private SignUpObserver observer;
+
+    private class SignUpObserver implements Observer{
+        private  SignUpRequest request;
+
+        public SignUpObserver(SignUpRequest request){
+            this.request = request;
+        }
+
+        @Override
+        public void update(Observable o, Object arg) {
+            Log.d("execute ", "on update");
+            if(request.equals(o)){
+                boolean success = request.success();
+                if (success) {
+                    Toast.makeText(getApplicationContext() , "Registered Successfully." , Toast.LENGTH_LONG).show();
+                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(i);
+                } else {
+
+                    Toast.makeText(getApplicationContext(), "Not registered.", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    public void checkLoggedIn(){
+        auth = Authenticator.getInstance(this);
+        if(auth.getToken() != null){
+            Intent intent;
+            if (auth.isAdmin()) {
+                intent = new Intent(getApplicationContext(), AdminMainActivity.class);
+            } else {
+                intent = new Intent(getApplicationContext(), MainActivity.class);
+            }
+
+            startActivity(intent);
+        }
+    }
+
     @Override
-
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
@@ -50,6 +82,13 @@ public class SignupActivity extends AppCompatActivity {
             final EditText emailField = (EditText) findViewById(R.id.userEmailId);
             final EditText confirmPassField = (EditText) findViewById(R.id.confirmPassword);
             final Button signUpButton = (Button) findViewById(R.id.signUpBtn);
+
+            checkLoggedIn();
+
+            request = new SignUpRequest(this);
+            observer = new SignUpObserver(request);
+            request.addObserver(observer);
+
             signUpButton.setEnabled(false);
             CheckBox terms = (CheckBox) findViewById(R.id.terms_conditions);
             terms.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -76,9 +115,6 @@ public class SignupActivity extends AppCompatActivity {
                     }
                     else{
                         if(passField.getText().toString().trim().equals(confirmPassField.getText().toString().trim())){
-                            Toast.makeText(SignupActivity.this , "on click" , Toast.LENGTH_LONG).show();
-
-                            final String url = "http://10.42.0.1:3000/api/signup";
                             String name = unameField.getText().toString();
                             String pass = passField.getText().toString();
                             String email = emailField.getText().toString();
@@ -86,48 +122,13 @@ public class SignupActivity extends AppCompatActivity {
                             String json = "{'name':" + name + ", 'password': " + pass + ", 'email': " + email + "}";
                             JSONObject requestJson = null;
 
-
                             try {
                                 requestJson = new JSONObject(json);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
 
-                            RequestQueue requestQueue = Volley.newRequestQueue(SignupActivity.this);
-                            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestJson, new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    try {
-                                        String status = response.getString("success");
-
-                                        boolean b = Boolean.parseBoolean(status);
-                                        if (b) {
-                                            Log.d("Medib", Boolean.toString(b));
-                                            Toast.makeText(getApplicationContext() , "status true " , Toast.LENGTH_LONG).show();
-                                            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                                            startActivity(i);
-                                        } else {
-
-                                            Toast.makeText(getApplicationContext(), "sign up failed", Toast.LENGTH_LONG).show();
-                                        }
-                                        Log.d("inside response" , "response");
-
-
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    //Log.d("inside error response" , error.getMessage());
-
-                                }
-                            });
-
-                            requestQueue.add(jsonObjectRequest);
-
+                            request.execute(requestJson);
                         }
                         else{
                             confirmPassField.setError("Passwords Don't Match");
@@ -139,14 +140,9 @@ public class SignupActivity extends AppCompatActivity {
 
 
         }
-    public void goToLogin(View v){
-        Toast.makeText(getApplicationContext() , "LOGIN clicked" , Toast.LENGTH_LONG).show();
-        Intent i = new Intent(getApplicationContext() , LoginActivity.class);
-        //setContentView(R.layout.activity_login);
-        startActivity(i);
 
+        public void goToLogin(View v){
+            Intent i = new Intent(this.getApplicationContext() , LoginActivity.class);
+            startActivity(i);
+        }
     }
-
-    }
-
-

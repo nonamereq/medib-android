@@ -5,22 +5,10 @@ import java.util.List;
 
 public class MatchContent {
     public static final List<Match> ITEMS = new ArrayList<Match>();
-    /*
-    private static final int COUNT = 25;
-    static {
-        // Add some sample items.
-        for (int i = 1; i <= COUNT; i++) {
-            addItem(createMatchItem());
-        }
-    }
-    */
+
     public static void addItem(Match item) {
         ITEMS.add(item);
     }
-    /*private static Match createMatchItem() {
-        return new Match("Man United", "Real Madrid","1.5","2.0");
-    }
-    */
 
     public static class Match {
         public final String mTeamName1;
@@ -44,5 +32,4 @@ public class MatchContent {
             return list;
         }
     }
-
 }
