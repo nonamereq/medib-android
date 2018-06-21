@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.abel.medib2.EditEventActivity"
+    android:orientation="vertical"
+    android:layout_marginBottom="100dp"
+    android:layout_marginTop="100dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:id="@+id/teamname1"
+            android:hint="TeamName1"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:id="@+id/teamodd1"
+            android:hint="Odd"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp">
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:id="@+id/teamname2"
+            android:hint="TeamName2"
+
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:id="@+id/teamodd2"
+            android:hint="Odd"
+            android:layout_height="wrap_content"/>
+
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pick Date"
+        android:onClick="showDatePicker"
+        android:id="@+id/pickDate"
+        android:layout_gravity="center"
+        android:padding="20dp" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pick Time"
+        android:onClick="showTimePickerDialog"
+        android:id="@+id/pickTime"
+        android:layout_gravity="center"
+        android:padding="20dp" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/edit_event_button"
+        android:text="Edit Event"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:padding="20dp"/>
+</LinearLayout>

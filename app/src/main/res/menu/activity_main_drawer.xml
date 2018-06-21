@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:showIn="navigation_view">
+
+    <item android:title="Account">
+        <menu android:checkableBehavior="single">
+            <item
+                android:id="@+id/nav_matches"
+
+                android:title="Macthes"/>
+            <item
+                android:id="@+id/nav_update"
+
+                android:title="Update Balance"/>
+            <item
+                android:id="@+id/nav_cashout"
+
+                android:title="Cashout"/>
+
+            <item
+                android:id="@+id/nav_manage"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="Settings"/>
+            <item
+                android:id="@+id/nav_logout"
+                android:title="Log Out"/>
+        </menu>
+    </item>
+
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+
+                android:title="Share"/>
+            <item
+                android:id="@+id/nav_send"
+                android:title="Send"/>
+            <item
+                android:id="@+id/nav_about"
+
+                android:title="About"/>
+        </menu>
+    </item>
+
+</menu>
