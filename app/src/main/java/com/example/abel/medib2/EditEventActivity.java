@@ -14,6 +14,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.abel.lib.Request.EditEventRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,28 +22,56 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Observable;
+import java.util.Observer;
 
 public class EditEventActivity extends AppCompatActivity {
 
     EditText mTeamName1,mTeamName2,mTeamOdd1,mTeamOdd2;
-    private Button mButton;
-    public static String date;
-    public static Calendar datee;
-    public ArrayList<String> EVENT=new ArrayList<>();
 
-    public static int hour;
-    public static int minute;
-    public static int day;
-    public static int month;
-    public static int year;
+    private Button mButton;
+
+    private EditEventRequest request;
+    private EditEventObserver observer;
+
+    private class EditEventObserver implements Observer {
+
+        private EditEventRequest request;
+
+        public EditEventObserver(EditEventRequest request){
+            this.request = request;
+        }
+
+        @Override
+        public void update(Observable o, Object arg) {
+            if(request.equals(o)){
+                boolean success = request.success();
+                if(success){
+                    Toast.makeText(getApplicationContext() , "Event saved successfully." ,Toast.LENGTH_LONG).show();
+                    onBackPressed();
+                }
+                else {
+
+                    Toast.makeText(getApplicationContext() , "Event is not saved." ,Toast.LENGTH_LONG).show();
+
+                }
+            }
+        }
+    }
+
+    public static Calendar date;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_event);
-        mButton=findViewById(R.id.edit_event_button);
+
+        date = Calendar.getInstance();
 
         Bundle bundle=getIntent().getBundleExtra("Match");
         ArrayList<String> array=bundle.getStringArrayList("Key");
+
+        mButton=findViewById(R.id.edit_event_button);
 
         mTeamName1=findViewById(R.id.teamname1);
         mTeamName2=findViewById(R.id.teamname2);
@@ -54,28 +83,19 @@ public class EditEventActivity extends AppCompatActivity {
         mTeamOdd1.setText(array.get(2));
         mTeamOdd2.setText(array.get(3));
         final String eventId = array.get(4);
-        Toast.makeText(getApplicationContext() , "id " + eventId , Toast.LENGTH_LONG ).show();
+
+        request = new EditEventRequest(this);
+        observer = new EditEventObserver(request);
+        request.addObserver(observer);
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                EVENT.add(String.valueOf(mTeamName1.getText()));
-                EVENT.add(String.valueOf(mTeamName2.getText()));
-                EVENT.add(String.valueOf(mTeamOdd1.getText()));
-                EVENT.add(String.valueOf(mTeamOdd2.getText()));
-                EVENT.add(date);
-                Toast.makeText(getApplicationContext(), "", Toast.LENGTH_LONG).show();
-                String url = "http://10.42.0.1:3000/admin/editEvent";
-
                 Double team1Odd = Double.parseDouble(mTeamOdd1.getText().toString());
                 Double team2Odd = Double.parseDouble(mTeamOdd2.getText().toString());
 
+                String jsonString = "{'team1_odd':" + team1Odd + " , 'team2_odd':" + team2Odd + " , 'date':" + date.getTimeInMillis() + " ,'id': " + eventId + "}";
 
-
-                String jsonString = "{'team1_odd':" + team1Odd + " , 'team2_odd':" + team2Odd +" , 'date':" + setTime() + " ,'id': " + eventId  +"}";
-
-
-                RequestQueue requestQueue= Volley.newRequestQueue(EditEventActivity.this);
                 JSONObject requestJson = null;
                 try {
                     requestJson = new JSONObject(jsonString);
@@ -83,65 +103,18 @@ public class EditEventActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestJson, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        String status = null;
-                        try {
-                            status = response.getString("success");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Boolean b = new Boolean(status);
-                        if(b){
-                            Toast.makeText(getApplicationContext() , "SUCCESFULL EDIT" ,Toast.LENGTH_LONG).show();
-                            onBackPressed();
-
-                        }
-                        else {
-
-                            Toast.makeText(getApplicationContext() , "EDIT FAILED" ,Toast.LENGTH_LONG).show();
-
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-                requestQueue.add(jsonObjectRequest);
-
-
-
-
-
-
+                request.execute(requestJson);
             }
         });
-            }
-
-
+    }
 
     public void showDatePicker(View v) {
         DialogFragment newFragment = new DatePickerFragment();
         newFragment.show(getSupportFragmentManager(), "date picker");
     }
+
     public void showTimePickerDialog(View v) {
         DialogFragment newFragment = new TimePickerFragment();
         newFragment.show(getSupportFragmentManager(), "time picker");
     }
-    public static long setTime(){
-        datee= Calendar.getInstance();
-        datee.set(Calendar.MINUTE,minute);
-        datee.set(Calendar.HOUR,hour);
-        datee.set(Calendar.DAY_OF_MONTH,day);
-        datee.set(Calendar.MONTH,month);
-        datee.set(Calendar.YEAR,year);
-        return datee.getTimeInMillis();
-
-    }
-
-
 }

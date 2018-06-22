@@ -25,22 +25,17 @@ public class DatePickerFragment extends DialogFragment {
     private DatePickerDialog.OnDateSetListener dateSetListener =
             new DatePickerDialog.OnDateSetListener() {
                 public void onDateSet(DatePicker view, int year, int month, int day) {
-                    Toast.makeText(getActivity(), "selected date is " + view.getYear() +
-                            " / " + (view.getMonth()+1) +
-                            " / " + view.getDayOfMonth(), Toast.LENGTH_SHORT).show();
                     Button pick = (Button) getActivity().findViewById(R.id.pickDate);
-                    pick.setText(view.getYear() + " / " + (view.getMonth()+1) + " / " + view.getDayOfMonth());
+                    pick.setText(year + " / " + (month + 1) + " / " + day);
                     if (getActivity() instanceof PostEventActivity){
-                        PostEventActivity.day=view.getDayOfMonth();
-                        PostEventActivity.month=view.getMonth();
-                        PostEventActivity.year=view.getYear();
-                        Log.d("AAAA", String.valueOf(PostEventActivity.hour));
+                        PostEventActivity.date.set(Calendar.DAY_OF_MONTH, day);
+                        PostEventActivity.date.set(Calendar.MONTH, month);
+                        PostEventActivity.date.set(Calendar.YEAR, year);
                     }
                     if (getActivity() instanceof EditEventActivity){
-                        EditEventActivity.day=view.getDayOfMonth();
-                        EditEventActivity.month=view.getMonth();
-                        EditEventActivity.year=view.getYear();
-                        Log.d("AAAA", String.valueOf(EditEventActivity.hour));
+                        EditEventActivity.date.set(Calendar.DAY_OF_MONTH, day);
+                        EditEventActivity.date.set(Calendar.MONTH, month);
+                        EditEventActivity.date.set(Calendar.YEAR, year);
                     }
 
                 }

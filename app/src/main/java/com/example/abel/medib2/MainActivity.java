@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity
                         data[i][2] = team1_odd.toString();
                         data[i][3] = team2_odd.toString();
                         data[i][4] = eventId;
-                        data[i][5] = auth.getToken();
 
                     }
                     MatchContent.ITEMS.clear();

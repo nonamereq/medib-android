@@ -154,8 +154,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void goToSignup(View v) {
-        Toast.makeText(getApplicationContext(), "LOGIN clicked", Toast.LENGTH_LONG).show();
-        Intent i = new Intent(this.getApplicationContext(), SignupActivity.class);
-        startActivity(i);
+        onBackPressed();
     }
 }

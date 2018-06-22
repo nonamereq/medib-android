@@ -1,6 +1,5 @@
 package com.example.abel.medib2;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -10,20 +9,52 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.example.abel.lib.Request.CashOutRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Observable;
+import java.util.Observer;
 
 public class CashoutActivity extends AppCompatActivity {
     private TextView mTextView;
     private EditText mEditText;
     private Button mButton;
+
+    CashOutRequest request;
+    CashOutObserver observer;
+
+    private class CashOutObserver implements Observer{
+        CashOutRequest request;
+
+        CashOutObserver(CashOutRequest request){
+            this.request = CashoutActivity.this.request;
+        }
+
+        @Override
+        public void update(Observable o, Object arg) {
+            if(request.equals(o)){
+                boolean success = request.success();
+                if(success){
+                    Toast.makeText(getApplicationContext() , "Cashout successful" , Toast.LENGTH_LONG).show();
+//                    Double updated = currentAmount - cashoutAmount;
+//                    mTextView.setText(updated.toString());
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    onBackPressed();
+                }
+                else {  // failed bet error display
+                    Toast.makeText(getApplicationContext() , "ERROR CASHING OUT" ,Toast.LENGTH_LONG);
+
+
+                }
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,18 +64,15 @@ public class CashoutActivity extends AppCompatActivity {
         mEditText=(EditText) findViewById(R.id.cashout_amount);
         mButton=(Button) findViewById(R.id.cashout_button);
 
-        Intent i = getIntent();
-        Bundle b = i.getExtras();
-        String cash = b.getString("cash");
+        request = new CashOutRequest(this);
+        observer = new CashOutObserver(request);
+        request.addObserver(observer);
 
-        final Double currentAmount = Double.parseDouble(cash);
-        mTextView.setText(currentAmount.toString());
+//        mTextView.setText(currentAmount.toString());
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //final String url = "http://10.21.42.253:3000/cashout";
-                final String url = "http://10.42.0.1:3000/user/cashout";
                 final Double  cashoutAmount  = Double.parseDouble(mEditText.getText().toString());
 
                 String jsonString = "{'amount':" + cashoutAmount  + "}";
@@ -57,44 +85,8 @@ public class CashoutActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                RequestQueue requestQueue = Volley.newRequestQueue(CashoutActivity.this);
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestJson, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        String status = null;
-                        try {
-                            status = response.getString("success");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Boolean b = new Boolean(status);
-                        if(b){ // code for successful bet
-                            Toast.makeText(getApplicationContext() , "SUCCESSFUL CASHOUT" , Toast.LENGTH_LONG).show();
 
-                            Double updated = currentAmount - cashoutAmount;
-                            mTextView.setText(updated.toString());
-                            try {
-                                Thread.sleep(2000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            onBackPressed();
-                        }
-                        else {  // failed bet error display
-                            Toast.makeText(getApplicationContext() , "ERROR CASHING OUT" ,Toast.LENGTH_LONG);
-
-
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-                requestQueue.add(jsonObjectRequest);
-
+                request.execute(requestJson);
             }
         });
     }

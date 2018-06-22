@@ -16,14 +16,50 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.abel.lib.Request.UpdateBalanceRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Observable;
+import java.util.Observer;
 
 public class UpdateActivity extends AppCompatActivity {
     private Button mButton;
     private TextView mTextView;
     private EditText mEditText;
+
+    private UpdateBalanceRequest request;
+    private UpdateBalanceObserver observer;
+
+    private class UpdateBalanceObserver implements Observer {
+        private UpdateBalanceRequest request;
+
+        public UpdateBalanceObserver(UpdateBalanceRequest request){
+            this.request = request;
+        }
+
+        @Override
+        public void update(Observable o, Object arg) {
+            if(request.equals(o)){
+                boolean status = request.success();
+                if(status){
+                    Toast.makeText(getApplicationContext() , "Successful update." , Toast.LENGTH_LONG).show();
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    onBackPressed();
+                }
+                else {
+                    Toast.makeText(getApplicationContext() , "Error updating your balance." ,Toast.LENGTH_LONG);
+                }
+            }
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,66 +68,26 @@ public class UpdateActivity extends AppCompatActivity {
         mEditText=(EditText) findViewById(R.id.update_amount);
         mTextView=(TextView) findViewById(R.id.current_balance_update);
         mButton = (Button) findViewById(R.id.update_button);
-        Intent i = getIntent();
-        Bundle b = i.getExtras();
-        String cash = b.getString("cash");
-        final Double currentAmount = Double.parseDouble(cash);
-        mTextView.setText(currentAmount.toString());
+
+        request = new UpdateBalanceRequest(this);
+        observer = new UpdateBalanceObserver(request);
+        request.addObserver(observer);
+
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final Double updateAmount = Double.parseDouble(mEditText.getText().toString());
-                final String url = "http://10.42.0.1:3000/user/updateBalance";
-                //Double  cashoutAmount  = Double.parseDouble(mEditText.getText().toString());
                 String jsonString = "{'amount':" + updateAmount  + "}";
                 JSONObject requestJson = null ;
 
                 try {
                     requestJson = new JSONObject(jsonString);
-                    Log.d("error" , String.valueOf((requestJson==null)));
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                RequestQueue requestQueue = Volley.newRequestQueue(UpdateActivity.this);
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestJson, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        String status = null;
-                        try {
-                            status = response.getString("success");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Boolean b = new Boolean(status);
-                        if(b){ // code for successful bet
-                            Toast.makeText(getApplicationContext() , "SUCCESSFUL UPDATE" , Toast.LENGTH_LONG).show();
 
-                            Double updated = updateAmount + currentAmount;
-                            mTextView.setText(updated.toString());
-                            try {
-                                Thread.sleep(2000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-
-                            onBackPressed();
-                        }
-                        else {  // failed bet error display
-                            Toast.makeText(getApplicationContext() , "ERROR UPDATING" ,Toast.LENGTH_LONG);
-
-
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-                requestQueue.add(jsonObjectRequest);
-
+                request.execute(requestJson);
             }
 
 

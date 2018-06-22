@@ -31,6 +31,8 @@ public class AdminMainActivity extends AppCompatActivity implements NavigationVi
     private IndexRequest request;
     private IndexObserver observer;
 
+    String eventId = "";
+
     private class IndexObserver implements Observer {
         IndexRequest request;
         public IndexObserver(IndexRequest request){
@@ -90,7 +92,7 @@ public class AdminMainActivity extends AppCompatActivity implements NavigationVi
             startActivity(intent);
         }
     }
-    String eventId = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -178,8 +180,7 @@ public class AdminMainActivity extends AppCompatActivity implements NavigationVi
                 break;
 
             case R.id.nav_logout:
-                onBackPressed();
-                super.onBackPressed();
+                logout();
                 break;
             case R.id.nav_manage:
             case R.id.nav_share:
@@ -207,5 +208,10 @@ public class AdminMainActivity extends AppCompatActivity implements NavigationVi
         startActivity(intent);
     }
 
+    public void logout(){
+        auth.removeToken();
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        startActivity(intent);
+    }
 }
 

@@ -23,11 +23,15 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.abel.lib.Authenticator;
+import com.example.abel.lib.Request.BetRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 public class BetActivity extends AppCompatActivity {
     private TextView mTeamName1,mTeamName2, mTeamOdd1,mTeamOdd2,mProfit;
@@ -36,10 +40,52 @@ public class BetActivity extends AppCompatActivity {
     private CheckBox mBoxTeam1, mBoxTeam2;
     private boolean checked=false;
 
+    Authenticator auth;
+    BetRequest request;
+    BetObserver observer;
+
+    private  class BetObserver implements Observer {
+        BetRequest request;
+
+        public BetObserver(BetRequest request){
+            this.request = request;
+        }
+        @Override
+        public void update(Observable o, Object arg) {
+            if(request.equals(o)){
+                boolean success = request.success();
+                if(success){
+                    Toast.makeText(getApplicationContext() , "SUCCESSFUL BET" , Toast.LENGTH_LONG).show();
+                    onBackPressed();
+                }
+                else {
+                    Toast.makeText(getApplicationContext() , "ERROR" ,Toast.LENGTH_LONG);
+                }
+            }
+        }
+    }
+
+    public void checkLoggedIn(){
+        auth = Authenticator.getInstance(this);
+        if(auth.getToken() != null){
+            if (auth.isAdmin()) {
+                Intent intent = new Intent(getApplicationContext(), AdminMainActivity.class);
+                startActivity(intent);
+            }
+        }
+        else{
+            Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
+            startActivity(intent);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bet);
+
+        checkLoggedIn();
+
         mTeamName1=findViewById(R.id.team_name_1_bet);
         mTeamName2=findViewById(R.id.team_name_2_bet);
         mTeamOdd1=findViewById(R.id.team_odd_1_bet);
@@ -51,7 +97,9 @@ public class BetActivity extends AppCompatActivity {
         mBoxTeam2=findViewById(R.id.team_2_button);
         Toolbar toolbar=findViewById(R.id.toolbar);
 
-        //setSupportActionBar(toolbar);
+        request = new BetRequest(this);
+        observer = new BetObserver(request);
+        request.addObserver(observer);
 
         Intent intent=getIntent();
         Bundle bundle=intent.getBundleExtra("Match");
@@ -60,9 +108,6 @@ public class BetActivity extends AppCompatActivity {
         mTeamName2.setText(items.get(1));
         mTeamOdd1.setText(items.get(2));
         mTeamOdd2.setText(items.get(3));
-        final String token = items.get(5);
-        Log.d("aaa" , token);
-//        Log.d("aaa" , items.get(4));
 
         final String eventId  = items.get(4);
         mButton.setOnClickListener(new View.OnClickListener() {
@@ -88,8 +133,7 @@ public class BetActivity extends AppCompatActivity {
                 }
                 if(validToBet){
 
-                    String jsonString = "{'id':" + eventId + " , 'team_name':" + selectedTeam +" , 'amount':" + betAmount + " ,'token': " + token +"}";
-                    Log.d("aaa", jsonString);
+                    String jsonString = "{'id':" + eventId + " , 'team_name':" + selectedTeam +" , 'amount':" + betAmount +"}";
 
                     JSONObject requestJson = null;
                     try {
@@ -100,52 +144,8 @@ public class BetActivity extends AppCompatActivity {
                         Log.d("json error " , e.getMessage());
                     }
 
-
-                    RequestQueue requestQueue = Volley.newRequestQueue(BetActivity.this);
-                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestJson, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                String status = response.getString("success");
-                                Boolean b = new Boolean(status);
-                                if(b){ // code for successful bet
-                                    Toast.makeText(getApplicationContext() , "SUCCESSFUL BET" , Toast.LENGTH_LONG).show();
-                                    onBackPressed();
-                                    //Intent i = new Intent(getApplicationContext() , MainActivity.class);
-                                    //setContentView(R.layout.activity_main);
-                                    //Bundle bund = new Bundle();
-                                    //bund.putString("tok" , token);
-                                    //i.putExtras(i);
-                                    //startActivity(i);
-
-
-                                }
-                                else {  // failed bet error display
-                                    Toast.makeText(getApplicationContext() , "ERROR" ,Toast.LENGTH_LONG);
-
-
-                                }
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-
-                        }
-                    });
-
-                    requestQueue.add(jsonObjectRequest);
-
+                    request.execute(requestJson);
                 }
-                else {
-
-                }
-
-
             }
         });
 
@@ -166,36 +166,12 @@ public class BetActivity extends AppCompatActivity {
                     mBoxTeam2.setChecked(false);
             }
         });
-        mBetAmount.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                double d;
-                if (mBoxTeam1.isChecked()){
-                    d=Double.parseDouble((String) mTeamOdd1.getText());
-                }
-                else if (mBoxTeam2.isChecked())d=Double.parseDouble((String)mTeamOdd2.getText());
-                else d=1;
-//                if(!charSequence.equals("") ) {
-//                    mProfit.setText(Double.toString(Double.parseDouble(charSequence.toString())*d));
-//                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
     }
+
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-
     }
 
 }

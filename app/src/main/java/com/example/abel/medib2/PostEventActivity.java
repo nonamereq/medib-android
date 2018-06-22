@@ -8,39 +8,64 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.example.abel.lib.Request.PostEventRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Observable;
+import java.util.Observer;
 
 public class PostEventActivity extends AppCompatActivity {
 
     private EditText mTeamName1, mTeamName2, mTeamOdd1, mTeamOdd2;
     private Button mButton;
-    public static String date;
-    public static Calendar datee;
-    public ArrayList<String> EVENT = new ArrayList<>();
+    
+    private PostEventRequest request;
+    private PostEventObserver observer;
+    
+    private class PostEventObserver implements Observer {
 
-    public static int hour;
-    public static int minute;
-    public static int day;
-    public static int month;
-    public static int year;
+        private PostEventRequest request;
+
+        PostEventObserver(PostEventRequest request){
+            this.request = request;
+        }
+        @Override
+        public void update(Observable o, Object arg) {
+            if(request.equals(o)){
+                boolean success = request.success();
+                if(success){
+                    Toast.makeText(getApplicationContext() , "SUCCESFULL POST" ,Toast.LENGTH_LONG).show();
+                    onBackPressed();
+                }
+                else {
+                    Toast.makeText(getApplicationContext() , "POST FAILED" ,Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    public static Calendar date;
+
+//    public static int hour;
+//    public static int minute;
+//    public static int day;
+//    public static int month;
+//    public static int year;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_event);
+
+        request = new PostEventRequest(this);
+        observer = new PostEventObserver(request);
+        request.addObserver(observer);
+
+        date = Calendar.getInstance();
 
 
         mButton = findViewById(R.id.post_event_button);
@@ -51,62 +76,32 @@ public class PostEventActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                EVENT.add(String.valueOf(mTeamName1.getText()));
-                EVENT.add(String.valueOf(mTeamName2.getText()));
-                EVENT.add(String.valueOf(mTeamOdd1.getText()));
-                EVENT.add(String.valueOf(mTeamOdd2.getText()));
-                EVENT.add(date);
-                String url = "http://10.42.0.1:3000/admin/postEvent";
                 String team1name = mTeamName1.getText().toString();
                 String team2name = mTeamName2.getText().toString();
-                Double team1Odd = Double.parseDouble(mTeamOdd1.getText().toString());
-                Double team2Odd = Double.parseDouble(mTeamOdd2.getText().toString());
-                Date d = new Date(123);
-                String date = "dsfs";
-                //Date must be changed to abel's format
+                double team1Odd;
+                try {
+                    team1Odd = Double.parseDouble(mTeamOdd1.getText().toString());
+                }catch (Exception e){
+                    team1Odd = 0;
+                }
+                double team2Odd;
+                try {
+                    team2Odd = Double.parseDouble(mTeamOdd2.getText().toString());
+                }catch(Exception e){
+                    team2Odd = 0;
 
+                }
 
-                String jsonString = "{'team1_name':" + team1name + " , 'team2_name':" + team2name +" , 'team1_odd':" + team1Odd + " ,'team2_odd': " + team1Odd + " , 'date':" +setTime()   +"}";
+                String jsonString = "{'team1_name':" + team1name + " , 'team2_name':" + team2name +" , 'team1_odd':" + team1Odd + " ,'team2_odd': " + team2Odd + " , 'date':" +date.getTimeInMillis()  +"}";
 
-                RequestQueue  requestQueue= Volley.newRequestQueue(PostEventActivity.this);
                 JSONObject requestJson = null;
                 try {
                     requestJson = new JSONObject(jsonString);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestJson, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        String status = null;
-                        try {
-                            status = response.getString("success");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Boolean b = new Boolean(status);
-                        if(b){
-                            Toast.makeText(getApplicationContext() , "SUCCESFULL POST" ,Toast.LENGTH_LONG).show();
-                            onBackPressed();
 
-
-                        }
-                        else {
-
-                            Toast.makeText(getApplicationContext() , "POST FAILED" ,Toast.LENGTH_LONG).show();
-
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-
-    requestQueue.add(jsonObjectRequest);
+                request.execute(requestJson);
             }
 
 
@@ -124,18 +119,5 @@ public class PostEventActivity extends AppCompatActivity {
         DialogFragment newFragment = new TimePickerFragment();
         newFragment.show(getSupportFragmentManager(), "time picker");
     }
-
-    public static long setTime(){
-        datee= Calendar.getInstance();
-        datee.set(Calendar.MINUTE,minute);
-        datee.set(Calendar.HOUR,hour);
-        datee.set(Calendar.DAY_OF_MONTH,day);
-        datee.set(Calendar.MONTH,month);
-        datee.set(Calendar.YEAR,year);
-
-        return datee.getTimeInMillis();
-
-    }
-
 }
 
