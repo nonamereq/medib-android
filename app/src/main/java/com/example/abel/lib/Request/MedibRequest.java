@@ -1,6 +1,15 @@
 package com.example.abel.lib.Request;
 
 import android.content.Context;
+import android.util.Log;
+
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.example.abel.lib.Authenticator;
+import com.example.abel.lib.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +21,7 @@ public abstract class MedibRequest<T> extends Observable{
     protected JSONObject response;
     private int status;
     protected boolean executeCalled = false;
+    protected static int requestMethod;
 
     MedibRequest(Context context){
         super();
@@ -21,8 +31,38 @@ public abstract class MedibRequest<T> extends Observable{
     }
 
     public abstract  String getUrl();
+    public abstract boolean authNedded();
 
-    public abstract  void execute(JSONObject json);
+    public void execute(JSONObject json){
+        if(authNedded()){
+            Authenticator auth = Authenticator.getInstance(context);
+            try {
+                json.put("token", auth.getToken());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Log.d("execute ", json.toString());
+        }
+        RequestQueue requestQueue = Volley.newRequestQueue(this.context);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(requestMethod, getUrl(), json, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject res) {
+                response = res;
+                executeCalled = true;
+                setChanged();
+                notifyObservers();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("execute ", error.getMessage());
+                executeCalled = true;
+                setChanged();
+                notifyObservers();
+            }
+        });
+        requestQueue.add(jsonObjectRequest);
+    };
 
     public boolean success(){
         boolean success = false;

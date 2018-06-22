@@ -7,6 +7,7 @@ public final class Constants{
     public static final String LOGIN_URL = URL + "api/login";
 
     //user urls
+    public static final String USERINFO_URL = URL + "user/userinfo";
     public static final String INDEX_URL = URL + "user/index";
     public static final String VIEW_URL = URL + "user/view";
     public static final String FINISHED_INDEX_URL = "user/finishedEvents";
