@@ -1,6 +1,7 @@
 package com.example.abel.medib2;
 
 import android.content.Intent;
+import android.os.Build;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +24,9 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.example.abel.lib.Authenticator;
+import com.example.abel.lib.NetworkErrorAlert;
 import com.example.abel.lib.Request.IndexRequest;
+import com.example.abel.lib.Request.MedibRequest;
 import com.example.abel.medib2.contents.MatchContent;
 
 public class AdminMainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener ,
@@ -42,38 +46,53 @@ public class AdminMainActivity extends AppCompatActivity implements NavigationVi
         @Override
         public void update(Observable o, Object arg) {
             if(request.equals(o)){
-                try {
+                if(request.whatHappened == IndexRequest.RESPONSE_OR_ERROR.RESPONSE) {
+                    try {
 
-                    JSONArray eventsJson = request.getDoc();
-                    String [][] data = new String[eventsJson.length()][6];
+                        JSONArray eventsJson = request.getDoc();
+                        String[][] data = new String[eventsJson.length()][6];
 
-                    //loop to set contents of the match view (match comes from server)
-                    for (int i =0; i <eventsJson.length() ; i++) {
-                        JSONObject eventJson = eventsJson.getJSONObject(i);
+                        //loop to set contents of the match view (match comes from server)
+                        for (int i = 0; i < eventsJson.length(); i++) {
+                            JSONObject eventJson = eventsJson.getJSONObject(i);
 
-                        String team1_name = eventJson.getString("team1_name");
-                        String team2_name = eventJson.getString("team2_name");
-                        Double team1_odd  = Double.parseDouble(eventJson.getString("team1_odd"));
-                        Double team2_odd  = Double.parseDouble(eventJson.getString("team2_odd"));
-                        eventId = eventJson.getString("_id");
-                        data[i][0] = team1_name;
-                        data[i][1] = team2_name;
-                        data[i][2] = team1_odd.toString();
-                        data[i][3] = team2_odd.toString();
-                        data[i][4] = eventId;
-                        data[i][5] = auth.getToken();
+                            String team1_name = eventJson.getString("team1_name");
+                            String team2_name = eventJson.getString("team2_name");
+                            Double team1_odd = Double.parseDouble(eventJson.getString("team1_odd"));
+                            Double team2_odd = Double.parseDouble(eventJson.getString("team2_odd"));
+                            eventId = eventJson.getString("_id");
+                            data[i][0] = team1_name;
+                            data[i][1] = team2_name;
+                            data[i][2] = team1_odd.toString();
+                            data[i][3] = team2_odd.toString();
+                            data[i][4] = eventId;
+                            data[i][5] = auth.getToken();
 
+                        }
+                        MatchContent.ITEMS.clear();
+                        for (int i = 0; i < eventsJson.length(); i++) {
+
+                            MatchContent.Match match = new MatchContent.Match(data[i][0], data[i][1], data[i][2], data[i][3], data[i][4], data[i][5]);
+                            MatchContent.addItem(match);
+                        }
+
+                        MatchFragment.notifyAdapter();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                    MatchContent.ITEMS.clear();
-                    for( int i =0 ; i<eventsJson.length() ;i++) {
-
-                        MatchContent.Match match = new MatchContent.Match(data[i][0] , data[i][1] , data[i][2] , data[i][3] , data[i][4] , data[i][5]) ;
-                        MatchContent.addItem(match);
+                } else{
+                    int status = request.status();
+                    if(status == 500){
+                        NetworkErrorAlert.createDialog(request.getContext(), "Server error. Please try again.", request, null).show();
                     }
-
-                    MatchFragment.notifyAdapter();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    else if(status == 401){
+                        Authenticator.getInstance(request.getContext()).removeToken();
+                        Toast.makeText(request.getContext(), "You have to login first ", Toast.LENGTH_LONG).show();
+                        checkLoggedIn();
+                    }
+                    else{
+                        NetworkErrorAlert.createDialog(request.getContext(), "Network connection error. Please try again", request, null).show();
+                    }
                 }
             }
         }
@@ -136,7 +155,10 @@ public class AdminMainActivity extends AppCompatActivity implements NavigationVi
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN)
+                finishAffinity();
+            else
+                System.exit(0);
         }
     }
 
@@ -146,22 +168,7 @@ public class AdminMainActivity extends AppCompatActivity implements NavigationVi
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
+    
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -182,9 +189,9 @@ public class AdminMainActivity extends AppCompatActivity implements NavigationVi
             case R.id.nav_logout:
                 logout();
                 break;
-            case R.id.nav_manage:
-            case R.id.nav_share:
-            case R.id.nav_send:
+//            case R.id.nav_manage:
+//            case R.id.nav_share:
+//            case R.id.nav_send:
             default:
                 break;
         }

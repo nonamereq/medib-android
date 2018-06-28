@@ -3,13 +3,14 @@ package com.example.abel.lib.Request;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.abel.lib.Authenticator;
-import com.example.abel.lib.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,11 +18,21 @@ import org.json.JSONObject;
 import java.util.Observable;
 
 public abstract class MedibRequest<T> extends Observable{
+    public enum RESPONSE_OR_ERROR {
+        RESPONSE,
+        ERROR,
+    };
+
     protected Context context;
-    protected JSONObject response;
-    private int status;
     protected boolean executeCalled = false;
     protected static int requestMethod;
+
+
+    protected VolleyError networkError;
+    public RESPONSE_OR_ERROR whatHappened;
+
+    private int status;
+    protected JSONObject response;
 
     MedibRequest(Context context){
         super();
@@ -37,11 +48,12 @@ public abstract class MedibRequest<T> extends Observable{
         if(authNedded()){
             Authenticator auth = Authenticator.getInstance(context);
             try {
+                if(json == null)
+                    json = new JSONObject();
                 json.put("token", auth.getToken());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Log.d("execute ", json.toString());
         }
         RequestQueue requestQueue = Volley.newRequestQueue(this.context);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(requestMethod, getUrl(), json, new Response.Listener<JSONObject>() {
@@ -49,14 +61,20 @@ public abstract class MedibRequest<T> extends Observable{
             public void onResponse(JSONObject res) {
                 response = res;
                 executeCalled = true;
+                whatHappened = RESPONSE_OR_ERROR.RESPONSE;
                 setChanged();
                 notifyObservers();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("execute ", error.getMessage());
+                Log.d("execute ", error.toString());
+
+                networkError = error;
+                status = networkError.networkResponse.statusCode;
+
                 executeCalled = true;
+                whatHappened = RESPONSE_OR_ERROR.ERROR;
                 setChanged();
                 notifyObservers();
             }
@@ -100,6 +118,10 @@ public abstract class MedibRequest<T> extends Observable{
         }
     }
 
+    public VolleyError getNetworkError(){
+        return networkError;
+    }
+
     public T getDoc(){
         if(executeCalled){
             if(response != null){
@@ -126,5 +148,9 @@ public abstract class MedibRequest<T> extends Observable{
             except.printStackTrace();
         }
         return object;
+    }
+
+    public Context getContext(){
+        return context;
     }
 }

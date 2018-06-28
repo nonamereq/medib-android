@@ -19,15 +19,21 @@ import org.json.JSONObject;
 import java.util.Observable;
 import java.util.Observer;
 
+import com.example.abel.lib.NetworkErrorAlert;
 import com.example.abel.lib.Request.LoginRequest;
 import com.example.abel.lib.Authenticator;
+import com.example.abel.lib.Request.MedibRequest;
 
 public class LoginActivity extends AppCompatActivity {
 
     // UI references.
-    private EditText mUserView;
-    private EditText mPasswordView;
-    private TextView mTextView;
+    private EditText usernameField;
+    private EditText passwordField;
+
+    //private variables
+    private Authenticator auth;
+    private LoginRequest request;
+    private LoginObserver observer;
 
     private class LoginObserver implements Observer {
         LoginRequest request;
@@ -40,46 +46,55 @@ public class LoginActivity extends AppCompatActivity {
         public void update(Observable o, Object arg) {
             Log.d("execute ", "update called");
             if (request.equals(o)) {
-                try {
-                    boolean success = request.success();
-                    Log.d("execute", "equal");
-                    if (success) {
-                        JSONObject userObject = request.getDoc();
-                        Double currentAmount = Double.parseDouble(userObject.getString("amount"));
-                        Log.d("value", "amount is" + currentAmount.toString());
-                        String token = request.getString("token");
-                        Boolean isAdmin = userObject.getBoolean("isAdmin");
+                if(request.whatHappened == LoginRequest.RESPONSE_OR_ERROR.RESPONSE) {
+                    try {
+                        boolean success = request.success();
+                        Log.d("execute", "equal");
+                        if (success) {
+                            JSONObject userObject = request.getDoc();
+                            Double currentAmount = Double.parseDouble(userObject.getString("amount"));
+                            Log.d("value", "amount is" + currentAmount.toString());
+                            String token = request.getString("token");
+                            Boolean isAdmin = userObject.getBoolean("isAdmin");
 
-                        auth.storeToken(token, isAdmin);
+                            auth.storeToken(token, isAdmin);
 
-                        Toast.makeText(getApplicationContext(), " Logged in", Toast.LENGTH_LONG).show();
-                        Log.d("admin", isAdmin.toString());
-                        Intent intent;
-                        if (isAdmin) {
-                            intent = new Intent(getApplicationContext(), AdminMainActivity.class);
+                            Toast.makeText(getApplicationContext(), " Logged in", Toast.LENGTH_LONG).show();
+                            Log.d("admin", isAdmin.toString());
+                            Intent intent;
+                            if (isAdmin) {
+                                intent = new Intent(getApplicationContext(), AdminMainActivity.class);
+                            } else {
+                                intent = new Intent(getApplicationContext(), MainActivity.class);
+                            }
+
+                            startActivity(intent);
                         } else {
-                            intent = new Intent(getApplicationContext(), MainActivity.class);
+
+                            Toast.makeText(getApplicationContext(), "Login error", Toast.LENGTH_LONG).show();
                         }
 
-                        startActivity(intent);
-                    } else {
-
-                        Toast.makeText(getApplicationContext(), "Login error", Toast.LENGTH_LONG).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
+                } else{
+                    if(request.status() == 500){
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    }
+                    else{
+                        if(request.status() == 500){
+                            NetworkErrorAlert.createDialog(request.getContext(), "Server error. Please try again.", request, constructRequest()).show();
+                        }
+                        else{
+                            NetworkErrorAlert.createDialog(request.getContext(), "Network connection error. Please try again", request, constructRequest()).show();
+                        }
+                    }
                 }
             } else {
                 Log.d("execute", "not equal");
             }
         }
     }
-
-    //private variables
-    private Authenticator auth;
-    private LoginRequest request;
-    private LoginObserver observer;
 
     public void checkLoggedIn(){
         auth = Authenticator.getInstance(this);
@@ -101,8 +116,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         // Set up the login form.
-        final EditText usernameField = (EditText) findViewById(R.id.userName);
-        final EditText passwordField = (EditText) findViewById(R.id.login_password);
+        usernameField = (EditText) findViewById(R.id.userName);
+        passwordField = (EditText) findViewById(R.id.login_password);
         Button loginButton = (Button) findViewById(R.id.loginBtn);
 
         checkLoggedIn();
@@ -135,22 +150,33 @@ public class LoginActivity extends AppCompatActivity {
                 if (passwordField.getText().toString().trim().equals("")) {
                     passwordField.setError("Password Required");
                 } else {
-                    String name = usernameField.getText().toString();
-                    String pass = passwordField.getText().toString();
-                    String json = "{'name':" + name + ", 'password': " + pass + "}";
 
-                    JSONObject requestJson = null;
-                    try {
-                        requestJson = new JSONObject(json);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
 
-                    request.execute(requestJson);
+                    request.execute(constructRequest());
                 }
             }
 
         });
+    }
+
+    public JSONObject constructRequest(){
+        String name = usernameField.getText().toString();
+        String pass = passwordField.getText().toString();
+        String json = "{'name':" + name + ", 'password': " + pass + "}";
+
+        JSONObject requestJson = null;
+        try {
+            requestJson = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return requestJson;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, SignupActivity.class);
+        startActivity(intent);
     }
 
     public void goToSignup(View v) {

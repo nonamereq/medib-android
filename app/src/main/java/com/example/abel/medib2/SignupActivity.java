@@ -1,6 +1,7 @@
 package com.example.abel.medib2;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,19 +19,19 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.example.abel.lib.Authenticator;
+import com.example.abel.lib.NetworkErrorAlert;
+import com.example.abel.lib.Request.MedibRequest;
 import com.example.abel.lib.Request.SignUpRequest;
 
 
 public class SignupActivity extends AppCompatActivity {
 
     // UI references.
-    private EditText mEmailView;
-    private EditText mPasswordView;
-    private View mProgressView;
-    private View mLoginFormView;
+    private EditText unameField;
+    private EditText passField;
+    private EditText emailField;
 
     //private variables
-    private Authenticator auth;
     private SignUpRequest request;
     private SignUpObserver observer;
 
@@ -45,21 +46,29 @@ public class SignupActivity extends AppCompatActivity {
         public void update(Observable o, Object arg) {
             Log.d("execute ", "on update");
             if(request.equals(o)){
-                boolean success = request.success();
-                if (success) {
-                    Toast.makeText(getApplicationContext() , "Registered Successfully." , Toast.LENGTH_LONG).show();
-                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                    startActivity(i);
-                } else {
-
-                    Toast.makeText(getApplicationContext(), "Not registered.", Toast.LENGTH_LONG).show();
+                if(request.whatHappened == SignUpRequest.RESPONSE_OR_ERROR.RESPONSE) {
+                    boolean success = request.success();
+                    if (success) {
+                        Toast.makeText(getApplicationContext(), "Registered Successfully.", Toast.LENGTH_LONG).show();
+                        Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(i);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Not registered.", Toast.LENGTH_LONG).show();
+                    }
+                }else{
+                    if(request.status() == 500){
+                        NetworkErrorAlert.createDialog(request.getContext(), "Server error. Please try again.", request, constructRequest()).show();
+                    }
+                    else{
+                        NetworkErrorAlert.createDialog(request.getContext(), "Network connection error. Please try again", request, constructRequest()).show();
+                    }
                 }
             }
         }
     }
 
     public void checkLoggedIn(){
-        auth = Authenticator.getInstance(this);
+        Authenticator auth = Authenticator.getInstance(this);
         if(auth.getToken() != null){
             Intent intent;
             if (auth.isAdmin()) {
@@ -77,9 +86,10 @@ public class SignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
          //Set up the login form.
-            final EditText unameField = (EditText) findViewById(R.id.userName);
-            final EditText passField = (EditText) findViewById(R.id.password);
-            final EditText emailField = (EditText) findViewById(R.id.userEmailId);
+            unameField = (EditText) findViewById(R.id.userName);
+            passField = (EditText) findViewById(R.id.password);
+            emailField = (EditText) findViewById(R.id.userEmailId);
+
             final EditText confirmPassField = (EditText) findViewById(R.id.confirmPassword);
             final Button signUpButton = (Button) findViewById(R.id.signUpBtn);
 
@@ -115,20 +125,7 @@ public class SignupActivity extends AppCompatActivity {
                     }
                     else{
                         if(passField.getText().toString().trim().equals(confirmPassField.getText().toString().trim())){
-                            String name = unameField.getText().toString();
-                            String pass = passField.getText().toString();
-                            String email = emailField.getText().toString();
-
-                            String json = "{'name':" + name + ", 'password': " + pass + ", 'email': " + email + "}";
-                            JSONObject requestJson = null;
-
-                            try {
-                                requestJson = new JSONObject(json);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-
-                            request.execute(requestJson);
+                            request.execute(constructRequest());
                         }
                         else{
                             confirmPassField.setError("Passwords Don't Match");
@@ -141,8 +138,32 @@ public class SignupActivity extends AppCompatActivity {
 
         }
 
-        public void goToLogin(View v){
-            Intent i = new Intent(this.getApplicationContext() , LoginActivity.class);
-            startActivity(i);
-        }
+    @Override
+    public void onBackPressed(){
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN)
+            finishAffinity();
+        else
+            System.exit(0);
     }
+
+    public JSONObject constructRequest(){
+        String name = unameField.getText().toString();
+        String pass = emailField.getText().toString();
+        String email = passField.getText().toString();
+
+        String json = "{'name':" + name + ", 'password': " + pass + ", 'email': " + email + "}";
+        JSONObject requestJson = null;
+
+        try {
+            requestJson = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return requestJson;
+    }
+
+    public void goToLogin(View v){
+        Intent i = new Intent(this.getApplicationContext() , LoginActivity.class);
+        startActivity(i);
+    }
+}
