@@ -13,36 +13,36 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SignupActivity"
+            android:name="com.example.abel.medib.SignupActivity"
             android:label="@string/title_activity_signup">
 
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name="com.example.abel.medib.MainActivity">
         </activity>
         <activity
-            android:name=".SplashActivity">
+            android:name="com.example.abel.medib.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name="com.example.abel.medib.LoginActivity"
             android:label="@string/app_name">
 
         </activity>
-        <activity android:name=".UpdateActivity">
+        <activity android:name="com.example.abel.medib.UpdateActivity">
         </activity>
-        <activity android:name=".CashoutActivity">
+        <activity android:name="com.example.abel.medib.CashoutActivity">
         </activity>
-        <activity android:name=".BetActivity">
+        <activity android:name="com.example.abel.medib.BetActivity">
         </activity>
-        <activity android:name=".PostEventActivity">
+        <activity android:name="com.example.abel.medib.PostEventActivity">
 
         </activity>
-        <activity android:name=".EditEventActivity">
+        <activity android:name="com.example.abel.medib.EditEventActivity">
         </activity>
-        <activity android:name=".AdminMainActivity">
+        <activity android:name="com.example.abel.medib.AdminMainActivity">
 
         </activity>
     </application>
