@@ -1,4 +1,4 @@
-package com.example.abel.medib2;
+package com.example.abel.medib;
 
 import android.content.Intent;
 import android.os.Build;
@@ -20,8 +20,8 @@ import java.util.Observer;
 
 import com.example.abel.lib.Authenticator;
 import com.example.abel.lib.NetworkErrorAlert;
-import com.example.abel.lib.Request.MedibRequest;
 import com.example.abel.lib.Request.SignUpRequest;
+import com.example.abel.medib2.R;
 
 
 public class SignupActivity extends AppCompatActivity {
@@ -148,8 +148,8 @@ public class SignupActivity extends AppCompatActivity {
 
     public JSONObject constructRequest(){
         String name = unameField.getText().toString();
-        String pass = emailField.getText().toString();
-        String email = passField.getText().toString();
+        String pass = passField.getText().toString();
+        String email = emailField.getText().toString();
 
         String json = "{'name':" + name + ", 'password': " + pass + ", 'email': " + email + "}";
         JSONObject requestJson = null;

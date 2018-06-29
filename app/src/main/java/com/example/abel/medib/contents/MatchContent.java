@@ -1,4 +1,4 @@
-package com.example.abel.medib2.contents;
+package com.example.abel.medib.contents;
 
 import java.util.ArrayList;
 import java.util.List;

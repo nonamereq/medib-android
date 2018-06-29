@@ -1,4 +1,4 @@
-package com.example.abel.medib2;
+package com.example.abel.medib;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -7,22 +7,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.abel.medib2.MatchFragment.OnListFragmentInteractionListener;
-import com.example.abel.medib2.contents.MatchContent.Match;
+import com.example.abel.medib.contents.MatchContent;
+import com.example.abel.medib2.R;
 
 import java.util.List;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link //League} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
+ * specified {@link MatchFragment.OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
 public class MyMatchRecyclerViewAdapter extends RecyclerView.Adapter<MyMatchRecyclerViewAdapter.ViewHolder> {
 
-    private final List<Match> mValues;
-    private final OnListFragmentInteractionListener mListener;
+    private final List<MatchContent.Match> mValues;
+    private final MatchFragment.OnListFragmentInteractionListener mListener;
 
-    public MyMatchRecyclerViewAdapter(List<Match> items, OnListFragmentInteractionListener listener) {
+    public MyMatchRecyclerViewAdapter(List<MatchContent.Match> items, MatchFragment.OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -70,7 +70,7 @@ public class MyMatchRecyclerViewAdapter extends RecyclerView.Adapter<MyMatchRecy
         public final TextView mTeamOdd2;
         public final TextView mVsView;
 
-        public Match mItem;
+        public MatchContent.Match mItem;
 
         public ViewHolder(View view) {
             super(view);

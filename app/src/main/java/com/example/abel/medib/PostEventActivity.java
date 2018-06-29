@@ -1,4 +1,4 @@
-package com.example.abel.medib2;
+package com.example.abel.medib;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,48 +11,43 @@ import android.widget.Toast;
 
 import com.example.abel.lib.Authenticator;
 import com.example.abel.lib.NetworkErrorAlert;
-import com.example.abel.lib.Request.EditEventRequest;
+import com.example.abel.lib.Request.PostEventRequest;
+import com.example.abel.medib2.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Observable;
 import java.util.Observer;
 
-public class EditEventActivity extends AppCompatActivity {
+public class PostEventActivity extends AppCompatActivity {
 
-    EditText mTeamName1,mTeamName2,mTeamOdd1,mTeamOdd2;
-    String eventId;
+    private EditText mTeamName1, mTeamName2, mTeamOdd1, mTeamOdd2;
 
-    private EditEventRequest request;
-    private EditEventObserver observer;
+    private PostEventRequest request;
+    private PostEventObserver observer;
+    
+    private class PostEventObserver implements Observer {
 
-    private class EditEventObserver implements Observer {
+        private PostEventRequest request;
 
-        private EditEventRequest request;
-
-        EditEventObserver(EditEventRequest request){
+        PostEventObserver(PostEventRequest request){
             this.request = request;
         }
-
         @Override
         public void update(Observable o, Object arg) {
-            if(request.whatHappened == EditEventRequest.RESPONSE_OR_ERROR.RESPONSE) {
+            if(request.whatHappened == PostEventRequest.RESPONSE_OR_ERROR.RESPONSE) {
                 if (request.equals(o)) {
                     boolean success = request.success();
                     if (success) {
-                        Toast.makeText(getApplicationContext(), "Event saved successfully.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "SUCCESFULL POST", Toast.LENGTH_LONG).show();
                         onBackPressed();
                     } else {
-
-                        Toast.makeText(getApplicationContext(), "Event is not saved.", Toast.LENGTH_LONG).show();
-
+                        Toast.makeText(getApplicationContext(), "POST FAILED", Toast.LENGTH_LONG).show();
                     }
                 }
-            }
-            else{
+            } else{
                 int status = request.status();
                 if(status == 500){
                     NetworkErrorAlert.createDialog(request.getContext(), "Server error. Please try again.", request, constructRequest()).show();
@@ -88,40 +83,35 @@ public class EditEventActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_event);
+        setContentView(R.layout.activity_post_event);
 
         checkLoggedIn();
 
+        request = new PostEventRequest(this);
+        observer = new PostEventObserver(request);
+        request.addObserver(observer);
+
         date = Calendar.getInstance();
 
-        Bundle bundle=getIntent().getBundleExtra("Match");
-        ArrayList<String> array=bundle.getStringArrayList("Key");
 
-        final Button mButton= findViewById(R.id.edit_event_button);
+        final Button mButton = findViewById(R.id.post_event_button);
 
-        mTeamName1 = findViewById(R.id.teamname1);
-        mTeamName2 = findViewById(R.id.teamname2);
-        mTeamOdd1  = findViewById(R.id.teamodd1);
-        mTeamOdd2  = findViewById(R.id.teamodd2);
-
-        mTeamName1.setText(array.get(0));
-        mTeamName2.setText(array.get(1));
-        mTeamOdd1.setText(array.get(2));
-        mTeamOdd2.setText(array.get(3));
-
-        eventId = array.get(4);
-
-        request = new EditEventRequest(this);
-        observer = new EditEventObserver(request);
-        request.addObserver(observer);
+        mTeamName1 = findViewById(R.id.teamName1);
+        mTeamName2 = findViewById(R.id.teamName2);
+        mTeamOdd1  = findViewById(R.id.teamOdd1);
+        mTeamOdd2  = findViewById(R.id.teamOdd2);
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 request.execute(constructRequest());
             }
+
+
         });
+
     }
+
 
     public void showDatePicker(View v) {
         DialogFragment newFragment = new DatePickerFragment();
@@ -134,10 +124,23 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     public JSONObject constructRequest(){
-        Double team1Odd = Double.parseDouble(mTeamOdd1.getText().toString());
-        Double team2Odd = Double.parseDouble(mTeamOdd2.getText().toString());
+        String team1name = mTeamName1.getText().toString();
+        String team2name = mTeamName2.getText().toString();
+        double team1Odd;
+        try {
+            team1Odd = Double.parseDouble(mTeamOdd1.getText().toString());
+        }catch (Exception e){
+            team1Odd = 0;
+        }
+        double team2Odd;
+        try {
+            team2Odd = Double.parseDouble(mTeamOdd2.getText().toString());
+        }catch(Exception e){
+            team2Odd = 0;
 
-        String jsonString = "{'team1_odd':" + team1Odd + " , 'team2_odd':" + team2Odd + " , 'date':" + date.getTimeInMillis() + " ,'id': " + eventId + "}";
+        }
+
+        String jsonString = "{'team1_name':" + team1name + " , 'team2_name':" + team2name +" , 'team1_odd':" + team1Odd + " ,'team2_odd': " + team2Odd + " , 'date':" +date.getTimeInMillis()  +"}";
 
         JSONObject requestJson = null;
         try {
@@ -145,6 +148,8 @@ public class EditEventActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
         return requestJson;
     }
 }
+

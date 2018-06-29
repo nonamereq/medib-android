@@ -1,4 +1,4 @@
-package com.example.abel.medib2;
+package com.example.abel.medib;
 
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -9,7 +9,7 @@ import android.text.format.DateFormat;
 import android.widget.Button;
 import android.widget.TimePicker;
 
-import com.example.abel.lib.Request.PostEventRequest;
+import com.example.abel.medib2.R;
 
 import java.util.Calendar;
 

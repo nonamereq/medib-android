@@ -1,18 +1,17 @@
-package com.example.abel.medib2;
+package com.example.abel.medib;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import com.example.abel.medib2.contents.MatchContent;
-
+import com.example.abel.medib2.R;
+import com.example.abel.medib.contents.LeagueContent;
 
 /**
  * A fragment representing a list of Items.
@@ -20,7 +19,7 @@ import com.example.abel.medib2.contents.MatchContent;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class MatchFragment extends Fragment {
+public class EventFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -32,13 +31,13 @@ public class MatchFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public MatchFragment() {
+    public EventFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static MatchFragment newInstance(int columnCount) {
-        MatchFragment fragment = new MatchFragment();
+    public static EventFragment newInstance(int columnCount) {
+        EventFragment fragment = new EventFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -53,26 +52,24 @@ public class MatchFragment extends Fragment {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
     }
-    RecyclerView recyclerView;
-    static MyMatchRecyclerViewAdapter adapter;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_match_list, container, false);
-        Log.d("FRAGMENT","FRAGMENT RUNNING");
+        View view = inflater.inflate(R.layout.fragment_event_list, container, false);
+
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            adapter=new MyMatchRecyclerViewAdapter(MatchContent.ITEMS, mListener);
-            recyclerView.setAdapter(adapter);
-
+            RecyclerView recyclerView = (RecyclerView) view;
+            if (mColumnCount <= 1) {
+                recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            } else {
+                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
+            }
+            recyclerView.setAdapter(new MyLeagueRecyclerViewAdapter(LeagueContent.ITEMS, mListener));
         }
         return view;
-    }
-    public static void notifyAdapter(){
-        adapter.notifyDataSetChanged();
     }
 
 
@@ -105,6 +102,6 @@ public class MatchFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onMatchSelected(MatchContent.Match item);
+        void onLeagueSelected(LeagueContent.League item);
     }
 }

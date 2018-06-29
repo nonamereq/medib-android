@@ -1,4 +1,4 @@
-package com.example.abel.medib2;
+package com.example.abel.medib;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -22,7 +21,7 @@ import java.util.Observer;
 import com.example.abel.lib.NetworkErrorAlert;
 import com.example.abel.lib.Request.LoginRequest;
 import com.example.abel.lib.Authenticator;
-import com.example.abel.lib.Request.MedibRequest;
+import com.example.abel.medib2.R;
 
 public class LoginActivity extends AppCompatActivity {
 

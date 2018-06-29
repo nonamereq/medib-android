@@ -1,33 +1,20 @@
-package com.example.abel.medib2;
+package com.example.abel.medib;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.abel.lib.Authenticator;
 import com.example.abel.lib.NetworkErrorAlert;
 import com.example.abel.lib.Request.BetRequest;
-import com.example.abel.lib.Request.LoginRequest;
-import com.example.abel.lib.Request.MedibRequest;
+import com.example.abel.medib2.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,4 +1,4 @@
-package com.example.abel.medib2;
+package com.example.abel.medib;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -6,22 +6,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.abel.medib2.EventFragment.OnListFragmentInteractionListener;
-import com.example.abel.medib2.contents.LeagueContent.League;
+import com.example.abel.medib.contents.LeagueContent;
+import com.example.abel.medib2.R;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link League} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
+ * {@link RecyclerView.Adapter} that can display a {@link LeagueContent.League} and makes a call to the
+ * specified {@link EventFragment.OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
 public class MyLeagueRecyclerViewAdapter extends RecyclerView.Adapter<MyLeagueRecyclerViewAdapter.ViewHolder> {
 
-    private final List<League> mValues;
-    private final OnListFragmentInteractionListener mListener;
+    private final List<LeagueContent.League> mValues;
+    private final EventFragment.OnListFragmentInteractionListener mListener;
 
-    public MyLeagueRecyclerViewAdapter(List<League> items, OnListFragmentInteractionListener listener) {
+    public MyLeagueRecyclerViewAdapter(List<LeagueContent.League> items, EventFragment.OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -60,7 +60,7 @@ public class MyLeagueRecyclerViewAdapter extends RecyclerView.Adapter<MyLeagueRe
         public final View mView;
 
         public final TextView mContentView;
-        public League mItem;
+        public LeagueContent.League mItem;
 
         public ViewHolder(View view) {
             super(view);

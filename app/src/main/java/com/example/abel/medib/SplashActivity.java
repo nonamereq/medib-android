@@ -1,8 +1,10 @@
-package com.example.abel.medib2;
+package com.example.abel.medib;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.example.abel.medib2.R;
 
 public class SplashActivity extends AppCompatActivity {
 

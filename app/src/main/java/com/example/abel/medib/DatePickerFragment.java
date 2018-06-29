@@ -1,14 +1,14 @@
-package com.example.abel.medib2;
+package com.example.abel.medib;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.Toast;
+
+import com.example.abel.medib2.R;
 
 import java.util.Calendar;
 
