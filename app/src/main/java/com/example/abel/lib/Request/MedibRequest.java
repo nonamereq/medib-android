@@ -71,7 +71,11 @@ public abstract class MedibRequest<T> extends Observable{
                 Log.d("execute ", error.toString());
 
                 networkError = error;
-                status = networkError.networkResponse.statusCode;
+                try {
+                    status = networkError.networkResponse.statusCode;
+                } catch (Exception except){
+                    status = 0;
+                }
 
                 executeCalled = true;
                 whatHappened = RESPONSE_OR_ERROR.ERROR;
