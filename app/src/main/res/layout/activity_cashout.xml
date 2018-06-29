@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.abel.medib2.CashoutActivity"
+    tools:context="com.example.abel.medib2.com.example.abel.medib.CashoutActivity"
     android:orientation="vertical"
     android:gravity="center">
     <TextView

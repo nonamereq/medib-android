@@ -10,6 +10,6 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context="com.example.abel.medib2.EventFragment"
+    tools:context="com.example.abel.medib2.com.example.abel.medib.EventFragment"
     tools:listitem="@layout/fragment_event"
     />

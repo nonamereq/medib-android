@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.abel.medib2.UpdateActivity"
+    tools:context="com.example.abel.medib2.com.example.abel.medib.UpdateActivity"
     android:orientation="vertical"
     android:gravity="center">
 
