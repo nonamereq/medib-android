@@ -48,6 +48,8 @@ public class Authenticator {
     }
 
     public void storeToken(String token, boolean isAdmin){
+        this.token = token;
+        this.isAdmin = isAdmin;
         helper.store("token", token);
         helper.store("isAdmin", Boolean.toString(isAdmin));
     }
