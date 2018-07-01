@@ -4,9 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.abel.medib2.com.example.abel.medib.CashoutActivity"
+    tools:context="com.example.abel.medib.CashoutActivity"
     android:orientation="vertical"
-    android:gravity="center">
+    android:gravity="center"
+    android:id="@+id/cashOut">
     <TextView
         android:id="@+id/current"
         android:layout_width="wrap_content"

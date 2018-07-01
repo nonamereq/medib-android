@@ -49,7 +49,7 @@ public class UpdateActivity extends AppCompatActivity {
 
                         onBackPressed();
                     } else {
-                        Toast.makeText(getApplicationContext(), "Error updating your balance.", Toast.LENGTH_LONG);
+                        Toast.makeText(getApplicationContext(), "Error updating your balance.", Toast.LENGTH_LONG).show();
                     }
                 } else{
                     int status = request.status();

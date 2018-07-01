@@ -68,17 +68,21 @@ public abstract class MedibRequest<T> extends Observable{
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("execute ", error.toString());
-
+                boolean gotResponse = false;
                 networkError = error;
                 try {
                     status = networkError.networkResponse.statusCode;
+                    if(status == 400) {
+                        networkError = null;
+                        response = new JSONObject(new String(error.networkResponse.data, "UTF8"));
+                        gotResponse = true;
+                    }
                 } catch (Exception except){
                     status = 0;
                 }
 
                 executeCalled = true;
-                whatHappened = RESPONSE_OR_ERROR.ERROR;
+                whatHappened = gotResponse? RESPONSE_OR_ERROR.RESPONSE : RESPONSE_OR_ERROR.ERROR;
                 setChanged();
                 notifyObservers();
             }

@@ -42,8 +42,6 @@ public class CashoutActivity extends AppCompatActivity {
                     boolean success = request.success();
                     if (success) {
                         Toast.makeText(getApplicationContext(), "Cashout successful", Toast.LENGTH_LONG).show();
-                        //                    Double updated = currentAmount - cashoutAmount;
-                        //                    mTextView.setText(updated.toString());
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
@@ -51,7 +49,7 @@ public class CashoutActivity extends AppCompatActivity {
                         }
                         onBackPressed();
                     } else {
-                        Toast.makeText(getApplicationContext(), "ERROR CASHING OUT", Toast.LENGTH_LONG);
+                        Toast.makeText(getApplicationContext(), "Error Cashing Out.", Toast.LENGTH_LONG).show();
                     }
                 } else{
                     int status = request.status();

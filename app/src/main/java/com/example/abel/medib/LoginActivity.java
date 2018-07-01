@@ -51,8 +51,6 @@ public class LoginActivity extends AppCompatActivity {
                         Log.d("execute", "equal");
                         if (success) {
                             JSONObject userObject = request.getDoc();
-                            Double currentAmount = Double.parseDouble(userObject.getString("amount"));
-                            Log.d("value", "amount is" + currentAmount.toString());
                             String token = request.getString("token");
                             Boolean isAdmin = userObject.getBoolean("isAdmin");
 
@@ -78,19 +76,12 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 } else{
                     if(request.status() == 500){
-
+                        NetworkErrorAlert.createDialog(request.getContext(), "Server error. Please try again.", request, constructRequest()).show();
                     }
                     else{
-                        if(request.status() == 500){
-                            NetworkErrorAlert.createDialog(request.getContext(), "Server error. Please try again.", request, constructRequest()).show();
-                        }
-                        else{
-                            NetworkErrorAlert.createDialog(request.getContext(), "Network connection error. Please try again", request, constructRequest()).show();
-                        }
+                        NetworkErrorAlert.createDialog(request.getContext(), "Network connection error. Please try again", request, constructRequest()).show();
                     }
                 }
-            } else {
-                Log.d("execute", "not equal");
             }
         }
     }
